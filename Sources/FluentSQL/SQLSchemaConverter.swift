@@ -21,7 +21,7 @@ public struct SQLSchemaConverter {
     }
     
     // MARK: Private
-
+    
     private func update(_ schema: DatabaseSchema) -> SQLExpression {
         var update = SQLAlterTable(name: self.name(schema.schema))
         update.addColumns = schema.createFields.map(self.fieldDefinition)
@@ -88,7 +88,7 @@ public struct SQLSchemaConverter {
             return custom(any)
         }
     }
-
+    
     private func deleteConstraint(_ constraint: DatabaseSchema.ConstraintDelete, table: String) -> SQLExpression {
         switch constraint {
         case .constraint(let algorithm):
@@ -100,11 +100,11 @@ public struct SQLSchemaConverter {
             return custom(any)
         }
     }
-
+    
     private func constraintIdentifier(_ algorithm: DatabaseSchema.ConstraintAlgorithm, table: String) -> String {
         let fieldNames: [DatabaseSchema.FieldName]
         let prefix: String
-
+        
         switch algorithm {
         case .foreignKey(let localFields, _, let foreignFields, _, _):
             prefix = "fk"
@@ -115,7 +115,7 @@ public struct SQLSchemaConverter {
         default:
             fatalError("Constraint identifier not supported with custom constraints.")
         }
-
+        
         let fieldsString = fieldNames.map { field -> String in
             switch field {
             case .custom:
@@ -126,8 +126,8 @@ public struct SQLSchemaConverter {
         }.joined(separator: "+")
         return "\(prefix):\(fieldsString)"
     }
-
-
+    
+    
     private func foreignKeyAction(_ action: DatabaseSchema.ForeignKeyAction) -> SQLForeignKeyAction {
         switch action {
         case .noAction:
@@ -155,7 +155,7 @@ public struct SQLSchemaConverter {
             )
         }
     }
-
+    
     private func fieldUpdate(_ fieldDefinition: DatabaseSchema.FieldUpdate) -> SQLExpression {
         switch fieldDefinition {
         case .custom(let any):
@@ -221,6 +221,8 @@ public struct SQLSchemaConverter {
             return SQLRaw("FLOAT")
         case .double:
             return SQLRaw("DOUBLE")
+        case .daterange:
+            return SQLRaw("daterange")
         case .custom(let any):
             return custom(any)
         }
@@ -243,7 +245,7 @@ public struct SQLSchemaConverter {
             return custom(any)
         }
     }
-
+    
     private func key(_ key: FieldKey) -> String {
         switch key {
         case .id:
@@ -263,11 +265,11 @@ public struct SQLSchemaConverter {
 ///     `CONSTRAINT/KEY <name>`
 struct SQLDropConstraint: SQLExpression {
     public var name: SQLExpression
-
+    
     public init(name: SQLExpression) {
         self.name = name
     }
-
+    
     public func serialize(to serializer: inout SQLSerializer) {
         if serializer.dialect.name == "mysql" {
             serializer.write("KEY ")

@@ -48,6 +48,7 @@ public struct DatabaseSchema {
         case double
         case data
         case uuid
+        case daterange
 
         public static var json: DataType {
             .dictionary
